@@ -140,6 +140,10 @@ all_opt = {
 		"getopt" : "",
 		"help" : "",
 		"order" : ""},
+	"diag" : {
+		"getopt" : "",
+		"help" : "",
+		"order" : ""},
 	"passwd" : {
 		"getopt" : "p:",
 		"longopt" : "password",
@@ -1302,7 +1306,9 @@ def _parse_input_cmdline(avail_opt):
 	(getopt_string, longopt_list) = _prepare_getopt_args(avail_opt)
 
 	try:
-		entered_opt = getopt.gnu_getopt(sys.argv[1:], getopt_string, longopt_list)[0]
+		(entered_opt, left_arg) = getopt.gnu_getopt(sys.argv[1:], getopt_string, longopt_list)
+		if len(left_arg) > 0:
+			logging.warning("Unused arguments on command line: %s" % (str(left_arg)))
 	except getopt.GetoptError, error:
 		fail_usage("Parse error: " + error.msg)
 
@@ -1383,5 +1389,7 @@ def _get_available_actions(device_opt):
 	if not device_opt.count("separator"):
 		available_actions.remove("list")
 		available_actions.remove("list-status")
+	if device_opt.count("diag"):
+		available_actions.append("diag")
 
 	return (available_actions, default_value)
